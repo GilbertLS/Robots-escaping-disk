@@ -130,10 +130,11 @@ class Main:
 
     def new(self, radius, r1StartPos, r2StartPos, exitPos, startPointOnEdge, r1TravelOnCircleEdge, r2TravelOnCircleEdge):
         """Create our classes"""
-        self.disk = Disk(radius, (300,300))
-        self.r1   = Robot(r1StartPos, startPointOnEdge, r1TravelOnCircleEdge, (255,0,0))
-        self.r2   = Robot(r2StartPos, startPointOnEdge, r2TravelOnCircleEdge, (0,0,255))
-        self.exit = Exit(exitPos)
+        self.disk  = Disk(radius, (300,300))
+        self.r1    = Robot(r1StartPos, startPointOnEdge, r1TravelOnCircleEdge, (255,0,0))
+        self.r2    = Robot(r2StartPos, startPointOnEdge, r2TravelOnCircleEdge, (0,0,255))
+        self.exit  = Exit(exitPos)
+        self.clock = pygame.time.Clock()
 
     def _draw(self):
         self.screen.fill(pygame.Color(255,255,255))
@@ -145,6 +146,11 @@ class Main:
 
         pygame.display.update()
 
+    def _update(self):
+        elapsedTime = self.clock.tick_busy_loop(60)/1000 #Seconds since last update
+        self.r1.update(elapsedTime)
+        self.r2.update(elapsedTime)
+
     def MainLoop(self):
         """This is the Main Draw Loop"""
         while 1:
@@ -152,15 +158,18 @@ class Main:
                 if event.type == pygame.QUIT:
                     sys.exit()
 
+            self._update()
             self._draw()
 
 
 if __name__ == "__main__":
+    diskPos = (300,300)
     radius = 250
-    r2Pos = r1Pos = (300,300)
+    r1Pos = (250,350)
+    r2Pos = (350, 250)
     exitPos = (50, 300)
 
-    data = calcData((300,300), radius, r1Pos, r2Pos, exitPos, True)
+    data = calcData(diskPos, radius, r1Pos, r2Pos, exitPos, True)
     print(data)
     MainWindow = Main()
     MainWindow.new(radius, r1Pos, r2Pos, exitPos, data[0], data[1], data[2])
