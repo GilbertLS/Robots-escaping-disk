@@ -131,8 +131,8 @@ class Main:
     def new(self, radius, r1StartPos, r2StartPos, exitPos, startPointOnEdge, r1TravelOnCircleEdge, r2TravelOnCircleEdge):
         """Create our classes"""
         self.disk  = Disk(radius, (300,300))
-        self.r1    = Robot(r1StartPos, startPointOnEdge, r1TravelOnCircleEdge, (255,0,0))
-        self.r2    = Robot(r2StartPos, startPointOnEdge, r2TravelOnCircleEdge, (0,0,255))
+        self.r1    = Robot(r1StartPos, startPointOnEdge, r1TravelOnCircleEdge, False)
+        self.r2    = Robot(r2StartPos, startPointOnEdge, r2TravelOnCircleEdge, True)
         self.exit  = Exit(exitPos)
         self.clock = pygame.time.Clock()
 
@@ -147,7 +147,7 @@ class Main:
         pygame.display.update()
 
     def _update(self):
-        elapsedTime = self.clock.tick_busy_loop(60)/1000 #Seconds since last update
+        elapsedTime = self.clock.tick_busy_loop(100)/1000 #Seconds since last update
         self.r1.update(elapsedTime)
         self.r2.update(elapsedTime)
 
@@ -165,9 +165,9 @@ class Main:
 if __name__ == "__main__":
     diskPos = (300,300)
     radius = 250
-    r1Pos = (250,350)
-    r2Pos = (350, 250)
-    exitPos = (50, 300)
+    r1Pos = (300,350)
+    r2Pos = (300, 300)
+    exitPos = (550, 300)
 
     data = calcData(diskPos, radius, r1Pos, r2Pos, exitPos, True)
     print(data)

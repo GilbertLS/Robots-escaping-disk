@@ -12,7 +12,7 @@ def getArcLength(angle, radius):
 def getDistanceBetweenTwoPoints(point1Pos, point2Pos):
     return math.hypot(point2Pos[0] - point1Pos[0], point2Pos[1] - point1Pos[1])
 
-"""Returns the position of a point with the given angle"""
+"""Returns the position of a point on a circle with the given angle"""
 def getPointOnCircleEdgeFromAngle(originPos, radius, angle):
     x = originPos[0] + radius * math.cos(angle)
     y = originPos[1] + radius * math.sin(angle)
