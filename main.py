@@ -126,13 +126,14 @@ class Main:
         self.width = 600
         self.height = 600
         """Create the Screen"""
+        self.font = pygame.font.SysFont("monospace", 15)
         self.screen = pygame.display.set_mode((self.width, self.height))
 
     def new(self, radius, r1StartPos, r2StartPos, exitPos, startPointOnEdge, r1TravelOnCircleEdge, r2TravelOnCircleEdge):
         """Create our classes"""
         self.disk  = Disk(radius, (300,300))
-        self.r1    = Robot(r1StartPos, startPointOnEdge, r1TravelOnCircleEdge, False)
-        self.r2    = Robot(r2StartPos, startPointOnEdge, r2TravelOnCircleEdge, True)
+        self.r1    = Robot(r1StartPos, exitPos, startPointOnEdge, r1TravelOnCircleEdge, False)
+        self.r2    = Robot(r2StartPos, exitPos, startPointOnEdge, r2TravelOnCircleEdge, True)
         self.exit  = Exit(exitPos)
         self.clock = pygame.time.Clock()
 
@@ -141,13 +142,13 @@ class Main:
 
         self.disk.draw(self.screen)
         self.exit.draw(self.screen)
-        self.r1.draw(self.screen)
-        self.r2.draw(self.screen)
+        self.r1.draw(self.screen, self.font)
+        self.r2.draw(self.screen, self.font)
 
         pygame.display.update()
 
     def _update(self):
-        elapsedTime = self.clock.tick_busy_loop(100)/1000 #Seconds since last update
+        elapsedTime = self.clock.tick_busy_loop(60)/1000 #Seconds since last update
         self.r1.update(elapsedTime)
         self.r2.update(elapsedTime)
 
@@ -165,8 +166,8 @@ class Main:
 if __name__ == "__main__":
     diskPos = (300,300)
     radius = 250
-    r1Pos = (300,350)
-    r2Pos = (300, 300)
+    r1Pos = (300, 300)
+    r2Pos = (300, 400)
     exitPos = (550, 300)
 
     data = calcData(diskPos, radius, r1Pos, r2Pos, exitPos, True)

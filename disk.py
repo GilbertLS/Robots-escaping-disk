@@ -7,4 +7,5 @@ class Disk:
         self.y = position[1]
 
     def draw(self, screen):
-        pygame.draw.circle(screen, (0,0,0), (self.x, self.y), self.radius, 1)
+        pygame.draw.circle(screen, (0,0,0), (int(self.x), int(self.y)), self.radius, 1)
+        screen.set_at((int(self.x), int(self.y)), (0,0,0))
