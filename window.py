@@ -1,4 +1,5 @@
 import sys
+import time
 import pygame
 from pygame.locals import *
 from disk import Disk
@@ -19,7 +20,7 @@ class Window:
         """Create the Screen"""
         self.font   = pygame.font.SysFont("monospace", 20)
         self.screen = pygame.display.set_mode((self.width, self.height))
-        """Initialize"""
+        """Initialize classes as None"""
         self.disk  = None
         self.r1    = None
         self.r2    = None
@@ -58,6 +59,10 @@ class Window:
                 if event.type == pygame.QUIT:
                     sys.exit()
 
-            if(self.clock is not None):
+            if(None not in (self.r1, self.r2, self.disk, self.exit, self.clock)):
+                if(self.r1.getIsFinished() and self.r2.getIsFinished()):
+                    time.sleep(2)
+                    return
+
                 self._update()
                 self._draw()

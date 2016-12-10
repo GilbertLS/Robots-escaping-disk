@@ -8,7 +8,7 @@ import myMath
 class Robot:
     def __init__(self, disk, startPosition, exitPos, startPointOnEdge,
                 travelToEdge, travelOnCircleEdge, movesClockWise):
-        self.speed = 125                     #Amount of pixels moved per second
+        self.speed = disk.getRadius()        #Amount of pixels moved per second
         self.reachedEdge  = False            #Has robot reached circle edge
         self.reachedAngle = False            #Has robot reached angle when exit is found
         self.reachedExit  = False            #Has robot reached exit
@@ -53,13 +53,13 @@ class Robot:
         if(self.movesClockWise):
             string = 'Robot 2: '
 
-        string += str(math.ceil(self.distanceTravelled))
+        string += '%.3f' % (self.distanceTravelled / self.radius)
         text = font.render(string, 1, self.color)
 
         if(self.movesClockWise):
-            screen.blit(text, (440, 40))
+            screen.blit(text, (420, 40))
         else:
-            screen.blit(text, (440, 10))
+            screen.blit(text, (420, 10))
 
     """
     Update calculates robot's new position
@@ -81,6 +81,10 @@ class Robot:
         """Move robot to exit"""
         if(self.reachedAngle and not self.reachedExit):
             self.reachedExit = self._moveRobotToExitPoint(elapsedTime)
+
+    """Is robot finished?"""
+    def getIsFinished(self):
+        return self.reachedExit
 
     """Calls _moveRobotToPoint, to move robot to startPointOnEdge"""
     def _moveRobotToStartPointOnEdge(self, elapsedTime):

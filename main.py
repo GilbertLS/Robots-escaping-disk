@@ -4,12 +4,11 @@ import random
 import pygame
 from pygame.locals import *
 
-"""Import classes needed for simulation"""
 from window import Window
 import myMath
 from suppress import suppress_stdout
 
-def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, simulate=False):
+def calculateTravel(diskPos, radius, r1StartPos, r2StartPos, exitPos, simulate=False):
     """
     Both robots start in the center of disk
     Both robots must travel a distance of radius to reach same point on disk edge
@@ -165,32 +164,50 @@ def setupNew(scenario=1, window=None, debug=False):
 
     if(debug is False):
         with suppress_stdout():
-            data = calcData(diskPos, radius, r1Pos, r2Pos, exitPos, True)
+            data = calculateTravel(diskPos, radius, r1Pos, r2Pos, exitPos, True)
     else:
-        data = calcData(diskPos, radius, r1Pos, r2Pos, exitPos, True)
+        data = calculateTravel(diskPos, radius, r1Pos, r2Pos, exitPos, True)
 
-    print('Total Travel:', data[5], " also ", data[1] + data[3])
     if(window is not None):
         window.new(radius, r1Pos, r2Pos, exitPos, data[0], data[1], data[2], data[3], data[4])
+
+    return data[5] / radius
 
 def printUsage():
     print('Usage: main.py [ options ... ]')
     print('')
     print('Options')
     print(' -h:             Print this message')
-    print(' --simulate:     Simulate the escape algorithm')
+    print(' --nosimulation: Remove simulation of the escape algorithm')
     print(' --scenario:     Which escape scenario to run (default:1) [1,2,3]')
-    print(' --iterations:   Number of iterations of the algorithm (default: 1, max: 100)')
+    print(' --iterations:   Number of iterations of the algorithm (default: 1, max: 1000)')
+
+def loop(scenario, iterations, debug, simulate):
+    MainWindow = None
+    results = []
+
+    if(simulate is True):
+        MainWindow = Window()
+
+    for i in range(1, iterations + 1):
+        result = setupNew(scenario, MainWindow, debug)
+        results.insert(i-1, result)
+        print('Iteration ', i, ' Time:\t', result)
+
+        if(simulate is True):
+            MainWindow.MainLoop()
+
+    print('-------------------')
+    print('Average time over ', iterations, ' iterations: ', sum(results)/iterations)
 
 def main(argv):
     scenario   = 1
-    iterations = 0
+    iterations = 1
     debug      = False
-    simulate   = False
-    MainWindow = None
+    simulate   = True
 
     try:
-        opts, args = getopt.getopt(argv,'h',['help', 'scenario=','simulate','iterations=', 'debug'])
+        opts, args = getopt.getopt(argv,'h',['help', 'scenario=','nosimulation','iterations=', 'debug'])
     except getopt.GetoptError:
         printUsage()
         sys.exit(2)
@@ -201,35 +218,24 @@ def main(argv):
             sys.exit()
         elif opt == '--debug':
             debug = True
-        elif opt == '--simulate':
-            simulate = True
+        elif opt == '--nosimulation':
+            simulate = False
         elif opt == '--iterations':
             try:
                 iterations = int(arg)
-                if(iterations < 1 or iterations > 100):
-                    print('Error: --iterations needs an integer (1 to 100)')
-                    sys.exit(2)
+                if(iterations < 1 or iterations > 1000): raise ValueError()
             except ValueError:
-                print('Error: --iterations needs an integer (1 to 100)')
+                print('Error: --iterations needs an integer (1 to 1000)')
                 sys.exit(2)
         elif opt == '--scenario':
             try:
                 scenario = int(arg)
-                if(scenario < 1 or scenario > 3):
-                    print('Error: --scenario needs an integer [1,2,3]')
-                    sys.exit(2)
+                if(scenario < 1 or scenario > 3): raise ValueError()
             except ValueError:
                 print('Error: --scenario needs an integer [1,2,3]')
                 sys.exit(2)
 
-    if(simulate is True):
-        MainWindow = Window()
-
-    setupNew(scenario, MainWindow, debug)
-
-    if(MainWindow is not None):
-        MainWindow.MainLoop()
-
+    loop(scenario, iterations, debug, simulate)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
