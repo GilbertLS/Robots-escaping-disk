@@ -4,8 +4,8 @@ import random
 import pygame
 from pygame.locals import *
 
-from window import Window
 import myMath
+from classes.window import Window
 from suppress import suppress_stdout
 
 def calculateTravel(diskPos, radius, r1StartPos, r2StartPos, exitPos, simulate=False):

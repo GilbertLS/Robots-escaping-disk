@@ -2,13 +2,13 @@ import sys
 import time
 import pygame
 from pygame.locals import *
-from disk import Disk
-from robot import Robot
-from exit import Exit
+from classes.disk import Disk
+from classes.robot import Robot
+from classes.exit import Exit
 
 """
-This class is used for the simulation
-It loops 60 times a second so it can draw and update the simulation
+    This class is used for the simulation
+    It loops 60 times a second so it can draw and update the simulation
 """
 class Window:
     def __init__(self):
