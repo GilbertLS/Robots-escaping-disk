@@ -1,16 +1,15 @@
-import os, sys
+import os, sys, getopt
 import math
 import random
 import pygame
 from pygame.locals import *
 
 """Import classes needed for simulation"""
-from disk import Disk
-from robot import Robot
-from exit import Exit
+from window import Window
 import myMath
+from suppress import suppress_stdout
 
-def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, verbose=False):
+def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, simulate=False):
     """
     Both robots start in the center of disk
     Both robots must travel a distance of radius to reach same point on disk edge
@@ -105,7 +104,7 @@ def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, verbose=False):
     print('r1Travel:', r1TravelToEdge + r1TravelOnCircleEdge)
     print('r2Travel:', r2TravelToEdge + r2TravelOnCircleEdge)
 
-    if(verbose):
+    if(simulate):
         return(
             startPointOnEdge,
             r1TravelToEdge,
@@ -135,53 +134,6 @@ def getClosestPointOnEdge(point1Pos, point2Pos, originPos, radius):
     return myMath.getPointOnCircleEdgeFromAngle(originPos, radius, angleToEdge)
 
 
-"""This class handles the main initialization"""
-class Main:
-    def __init__(self):
-        """Initialize PyGame"""
-        pygame.init()
-        """Set the window Size"""
-        self.width = 600
-        self.height = 600
-        """Create the Screen"""
-        self.font = pygame.font.SysFont("monospace", 20)
-        self.screen = pygame.display.set_mode((self.width, self.height))
-
-    def new(self, radius, r1StartPos, r2StartPos, exitPos,
-           startPointOnEdge, r1TravelToEdge, r2TravelToEdge,
-           r1TravelOnCircleEdge, r2TravelOnCircleEdge):
-        """Create our classes"""
-        self.disk  = Disk(radius, (300,300))
-        self.r1    = Robot(self.disk, r1StartPos, exitPos, startPointOnEdge, r1TravelToEdge, r1TravelOnCircleEdge, False)
-        self.r2    = Robot(self.disk, r2StartPos, exitPos, startPointOnEdge, r2TravelToEdge, r2TravelOnCircleEdge, True)
-        self.exit  = Exit(exitPos)
-        self.clock = pygame.time.Clock()
-
-    def _draw(self):
-        self.screen.fill(pygame.Color(255,255,255))
-
-        self.disk.draw(self.screen)
-        self.exit.draw(self.screen)
-        self.r1.draw(self.screen, self.font)
-        self.r2.draw(self.screen, self.font)
-
-        pygame.display.update()
-
-    def _update(self):
-        elapsedTime = self.clock.tick_busy_loop(60)/1000 #Seconds since last update
-        self.r1.update(elapsedTime)
-        self.r2.update(elapsedTime)
-
-    def MainLoop(self):
-        """This is the Main Draw Loop"""
-        while 1:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-
-            self._update()
-            self._draw()
-
 def randomExit(origin, radius):
     angle = random.random() * math.pi * 2;
     x = math.cos(angle) * radius + origin[0]
@@ -195,20 +147,89 @@ def randomRPos(origin, radius):
     y = math.sin(angle) * randomRadius + origin[1]
     return (x,y)
 
-if __name__ == "__main__":
+def setupNew(scenario=1, window=None, debug=False):
     diskPos = (300,300)
-    radius = 250
-
-    r1Pos = (300, 300)
-    r2Pos = (300, 300)
-    exitPos = randomExit(diskPos, 250)
-
-    r1Pos = randomRPos(diskPos, radius)
-    r2Pos = randomRPos(diskPos, radius)
+    radius  = 250
+    r1Pos   = diskPos
+    r2Pos   = diskPos
     exitPos = randomExit(diskPos, radius)
 
-    data = calcData(diskPos, radius, r1Pos, r2Pos, exitPos, True)
-    print(data)
-    MainWindow = Main()
-    MainWindow.new(radius, r1Pos, r2Pos, exitPos, data[0], data[1], data[2], data[3], data[4])
-    MainWindow.MainLoop()
+    if(scenario == 2):
+        if(random.randint(0, 1)):
+            r1Pos = randomRPos(diskPos, radius)
+        else:
+            r2Pos = randomRPos(diskPos, radius)
+    elif(scenario == 3):
+        r1Pos = randomRPos(diskPos, radius)
+        r2Pos = randomRPos(diskPos, radius)
+
+    if(debug is False):
+        with suppress_stdout():
+            data = calcData(diskPos, radius, r1Pos, r2Pos, exitPos, True)
+    else:
+        data = calcData(diskPos, radius, r1Pos, r2Pos, exitPos, True)
+
+    print('Total Travel:', data[5], " also ", data[1] + data[3])
+    if(window is not None):
+        window.new(radius, r1Pos, r2Pos, exitPos, data[0], data[1], data[2], data[3], data[4])
+
+def printUsage():
+    print('Usage: main.py [ options ... ]')
+    print('')
+    print('Options')
+    print(' -h:             Print this message')
+    print(' --simulate:     Simulate the escape algorithm')
+    print(' --scenario:     Which escape scenario to run (default:1) [1,2,3]')
+    print(' --iterations:   Number of iterations of the algorithm (default: 1, max: 100)')
+
+def main(argv):
+    scenario   = 1
+    iterations = 0
+    debug      = False
+    simulate   = False
+    MainWindow = None
+
+    try:
+        opts, args = getopt.getopt(argv,'h',['help', 'scenario=','simulate','iterations=', 'debug'])
+    except getopt.GetoptError:
+        printUsage()
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            printUsage()
+            sys.exit()
+        elif opt == '--debug':
+            debug = True
+        elif opt == '--simulate':
+            simulate = True
+        elif opt == '--iterations':
+            try:
+                iterations = int(arg)
+                if(iterations < 1 or iterations > 100):
+                    print('Error: --iterations needs an integer (1 to 100)')
+                    sys.exit(2)
+            except ValueError:
+                print('Error: --iterations needs an integer (1 to 100)')
+                sys.exit(2)
+        elif opt == '--scenario':
+            try:
+                scenario = int(arg)
+                if(scenario < 1 or scenario > 3):
+                    print('Error: --scenario needs an integer [1,2,3]')
+                    sys.exit(2)
+            except ValueError:
+                print('Error: --scenario needs an integer [1,2,3]')
+                sys.exit(2)
+
+    if(simulate is True):
+        MainWindow = Window()
+
+    setupNew(scenario, MainWindow, debug)
+
+    if(MainWindow is not None):
+        MainWindow.MainLoop()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
