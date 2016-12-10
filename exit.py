@@ -1,5 +1,8 @@
 import pygame
 
+"""
+    This class is used to draw the exit during the simulation
+"""
 class Exit:
     def __init__(self, position=(300,300)):
         self.x = position[0]

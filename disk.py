@@ -1,5 +1,9 @@
 import pygame
 
+
+"""
+    This class is used to draw the disk during the simulation
+"""
 class Disk:
     def __init__(self, radius=250, position=(300,300)):
         self.radius = radius

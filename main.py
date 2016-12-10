@@ -85,7 +85,6 @@ def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, verbose=False):
         r2TravelOnCircleEdge = 0
 
     """Find position of robot when exit is found by the other robot"""
-    """THIS IS WRONG!!!!!"""
     if(whichRobotDidntFindExit == 1):
         tempAngle = -1 * getAngleFromArcLength(r1TravelOnCircleEdge, radius)
         posOfRobotWhoDidntFindExit = getPointOnCircleEdgeFromAngle(diskPos, radius, tempAngle - getAngleBetweenPointsOnCircle(diskPos, pointOnCircleAtAngleZero, startPointOnEdge))
@@ -148,9 +147,9 @@ class Main:
         self.font = pygame.font.SysFont("monospace", 20)
         self.screen = pygame.display.set_mode((self.width, self.height))
 
-    def new(self, radius, r1StartPos, r2StartPos,
-            exitPos, startPointOnEdge, r1TravelToEdge, r2TravelToEdge,
-            r1TravelOnCircleEdge, r2TravelOnCircleEdge):
+    def new(self, radius, r1StartPos, r2StartPos, exitPos,
+           startPointOnEdge, r1TravelToEdge, r2TravelToEdge,
+           r1TravelOnCircleEdge, r2TravelOnCircleEdge):
         """Create our classes"""
         self.disk  = Disk(radius, (300,300))
         self.r1    = Robot(self.disk, r1StartPos, exitPos, startPointOnEdge, r1TravelToEdge, r1TravelOnCircleEdge, False)
@@ -204,8 +203,8 @@ if __name__ == "__main__":
     r2Pos = (300, 300)
     exitPos = randomExit(diskPos, 250)
 
-    #r1Pos = randomRPos(diskPos, radius)
-    #r2Pos = randomRPos(diskPos, radius)
+    r1Pos = randomRPos(diskPos, radius)
+    r2Pos = randomRPos(diskPos, radius)
     exitPos = randomExit(diskPos, radius)
 
     data = calcData(diskPos, radius, r1Pos, r2Pos, exitPos, True)
