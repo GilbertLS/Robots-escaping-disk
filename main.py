@@ -8,7 +8,7 @@ from pygame.locals import *
 from disk import Disk
 from robot import Robot
 from exit import Exit
-from myMath import *
+import myMath
 
 def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, verbose=False):
     """
@@ -17,7 +17,7 @@ def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, verbose=False):
     """
     r1TravelToEdge = radius
     r2TravelToEdge = radius
-    pointOnCircleAtAngleZero = getPointOnCircleEdgeFromAngle(diskPos, radius, 0)
+    pointOnCircleAtAngleZero = myMath.getPointOnCircleEdgeFromAngle(diskPos, radius, 0)
     startPointOnEdge = pointOnCircleAtAngleZero
     r1TravelOnCircleEdge = 0
     r2TravelOnCircleEdge = 0
@@ -33,8 +33,8 @@ def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, verbose=False):
         startPointOnEdge = getClosestPointOnEdge(r1StartPos, r2StartPos, diskPos, radius)
         print('startPointOnEdge:', startPointOnEdge)
 
-        r1TravelToEdge = getDistanceBetweenTwoPoints(r1StartPos, startPointOnEdge)
-        r2TravelToEdge = getDistanceBetweenTwoPoints(r2StartPos, startPointOnEdge)
+        r1TravelToEdge = myMath.getDistanceBetweenTwoPoints(r1StartPos, startPointOnEdge)
+        r2TravelToEdge = myMath.getDistanceBetweenTwoPoints(r2StartPos, startPointOnEdge)
         print('r1TravelToEdge:', r1TravelToEdge)
         print('r2TravelToEdge:', r2TravelToEdge)
         print('------------------------------')
@@ -44,7 +44,7 @@ def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, verbose=False):
     R1 always goes CCW and R2 always goes CW
     CCW is positive and CW is negative
     """
-    angleBetweenStartAndEnd = getAngleBetweenPointsOnCircle(diskPos, startPointOnEdge, exitPos)
+    angleBetweenStartAndEnd = myMath.getAngleBetweenPointsOnCircle(diskPos, startPointOnEdge, exitPos)
     print('angleBetweenStartAndEnd:', math.degrees(angleBetweenStartAndEnd))
 
     r1Angle = angleBetweenStartAndEnd
@@ -57,8 +57,8 @@ def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, verbose=False):
     print('r1Angle:', r1Angle, math.degrees(r1Angle))
     print('r2Angle:', r2Angle, math.degrees(r2Angle))
 
-    r1TravelOnCircleEdge = getArcLength(r1Angle, radius)
-    r2TravelOnCircleEdge = getArcLength(r2Angle, radius)
+    r1TravelOnCircleEdge = myMath.getArcLength(r1Angle, radius)
+    r2TravelOnCircleEdge = myMath.getArcLength(r2Angle, radius)
 
     """Robot with shortest travel must find exit first"""
     if(r1TravelOnCircleEdge + r1TravelToEdge <= r2TravelOnCircleEdge + r2TravelToEdge):
@@ -86,15 +86,15 @@ def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, verbose=False):
 
     """Find position of robot when exit is found by the other robot"""
     if(whichRobotDidntFindExit == 1):
-        tempAngle = -1 * getAngleFromArcLength(r1TravelOnCircleEdge, radius)
-        posOfRobotWhoDidntFindExit = getPointOnCircleEdgeFromAngle(diskPos, radius, tempAngle - getAngleBetweenPointsOnCircle(diskPos, pointOnCircleAtAngleZero, startPointOnEdge))
+        tempAngle = -1 * myMath.getAngleFromArcLength(r1TravelOnCircleEdge, radius)
+        posOfRobotWhoDidntFindExit = myMath.getPointOnCircleEdgeFromAngle(diskPos, radius, tempAngle - myMath.getAngleBetweenPointsOnCircle(diskPos, pointOnCircleAtAngleZero, startPointOnEdge))
     else:
-        tempAngle = getAngleFromArcLength(r2TravelOnCircleEdge, radius)
-        posOfRobotWhoDidntFindExit = getPointOnCircleEdgeFromAngle(diskPos, radius, tempAngle - getAngleBetweenPointsOnCircle(diskPos, pointOnCircleAtAngleZero, startPointOnEdge))
+        tempAngle = myMath.getAngleFromArcLength(r2TravelOnCircleEdge, radius)
+        posOfRobotWhoDidntFindExit = myMath.getPointOnCircleEdgeFromAngle(diskPos, radius, tempAngle - myMath.getAngleBetweenPointsOnCircle(diskPos, pointOnCircleAtAngleZero, startPointOnEdge))
     print('posOfRobotWhoDidntFindExit:', posOfRobotWhoDidntFindExit)
 
     """Distance traveled for second robot to exit"""
-    travelToEnd = getDistanceBetweenTwoPoints(posOfRobotWhoDidntFindExit, exitPos)
+    travelToEnd = myMath.getDistanceBetweenTwoPoints(posOfRobotWhoDidntFindExit, exitPos)
     print('travelToEnd:', travelToEnd)
 
     if(whichRobotDidntFindExit == 1):
@@ -119,20 +119,20 @@ def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, verbose=False):
 
 
 def getClosestPointOnEdge(point1Pos, point2Pos, originPos, radius):
-    point1DistanceFromEdge = (radius - getDistanceBetweenTwoPoints(point1Pos, originPos))
-    point2DistanceFromEdge = (radius - getDistanceBetweenTwoPoints(point2Pos, originPos))
+    point1DistanceFromEdge = (radius - myMath.getDistanceBetweenTwoPoints(point1Pos, originPos))
+    point2DistanceFromEdge = (radius - myMath.getDistanceBetweenTwoPoints(point2Pos, originPos))
     angleToEdge = 0
     print('Distances from edge of circle', point1DistanceFromEdge, point2DistanceFromEdge)
 
     """Need to find angle that creates point on edge with shortest distance from closest point"""
     if(point1DistanceFromEdge <= point2DistanceFromEdge):
-        angleToEdge = getAngleBetweenPointsOnCircle(originPos, point1Pos, getPointOnCircleEdgeFromAngle(originPos, radius, 0))
+        angleToEdge = myMath.getAngleBetweenPointsOnCircle(originPos, point1Pos, myMath.getPointOnCircleEdgeFromAngle(originPos, radius, 0))
         print('angleToEdge point1:', angleToEdge, math.degrees(angleToEdge))
     else:
-        angleToEdge = getAngleBetweenPointsOnCircle(originPos, point2Pos, getPointOnCircleEdgeFromAngle(originPos, radius, 0))
+        angleToEdge = myMath.getAngleBetweenPointsOnCircle(originPos, point2Pos, myMath.getPointOnCircleEdgeFromAngle(originPos, radius, 0))
         print('angleToEdge point2:', angleToEdge, math.degrees(angleToEdge))
 
-    return getPointOnCircleEdgeFromAngle(originPos, radius, angleToEdge)
+    return myMath.getPointOnCircleEdgeFromAngle(originPos, radius, angleToEdge)
 
 
 """This class handles the main initialization"""

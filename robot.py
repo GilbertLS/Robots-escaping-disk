@@ -1,6 +1,6 @@
 import pygame
 import math
-from myMath import *
+import myMath
 
 """
     This class is used to update and draw the robot during the simulation
@@ -23,13 +23,13 @@ class Robot:
         self.travelOnCircleEdge = travelOnCircleEdge #Distance travelled on circle edge
 
         """Need to recalculate this in case exit is found before robot reaches circle edge"""
-        self.startPointOnEdge = getPointBetweenTwoPoints((self.x, self.y), startPointOnEdge, travelToEdge)
+        self.startPointOnEdge = myMath.getPointBetweenTwoPoints((self.x, self.y), startPointOnEdge, travelToEdge)
 
         """Calculates angle of the startPointOnEdge"""
-        self.angle = getAngleBetweenPointsOnCircle(self.origin, (self.origin[0] + self.radius, self.origin[1]), self.startPointOnEdge)
+        self.angle = myMath.getAngleBetweenPointsOnCircle(self.origin, (self.origin[0] + self.radius, self.origin[1]), self.startPointOnEdge)
 
         """Calculates the angle robot reaches when exit is found"""
-        self.angleOnCircleEdge = getAngleFromArcLength(self.travelOnCircleEdge, self.radius)
+        self.angleOnCircleEdge = myMath.getAngleFromArcLength(self.travelOnCircleEdge, self.radius)
         if(self.movesClockWise):
             self.angleOnCircleEdge = self.angle - self.angleOnCircleEdge
             self.color = (0,0,255)
@@ -50,7 +50,6 @@ class Robot:
         screen.set_at((int(self.x), int(self.y)), self.color)
 
         string = 'Robot 1: '
-
         if(self.movesClockWise):
             string = 'Robot 2: '
 
@@ -86,14 +85,14 @@ class Robot:
     """Calls _moveRobotToPoint, to move robot to startPointOnEdge"""
     def _moveRobotToStartPointOnEdge(self, elapsedTime):
         point    = self.startPointOnEdge
-        distance = getDistanceBetweenTwoPoints(point, (self.x, self.y))
+        distance = myMath.getDistanceBetweenTwoPoints(point, (self.x, self.y))
 
         return self._moveRobotToPoint(point, distance, elapsedTime)
 
     """Calls _moveRobotToPoint, to move robot to exit position"""
     def _moveRobotToExitPoint(self, elapsedTime):
         point    = self.exitPos
-        distance = getDistanceBetweenTwoPoints(point, (self.x, self.y))
+        distance = myMath.getDistanceBetweenTwoPoints(point, (self.x, self.y))
 
         return self._moveRobotToPoint(point, distance, elapsedTime)
 
@@ -111,7 +110,7 @@ class Robot:
             self.x = point[0];
             self.y = point[1];
 
-            self.distanceTravelled += getDistanceBetweenTwoPoints((self.x, self.y), (oldX, oldY))
+            self.distanceTravelled += myMath.getDistanceBetweenTwoPoints((self.x, self.y), (oldX, oldY))
 
             return True
         else:
@@ -122,7 +121,7 @@ class Robot:
             self.x += directionX * self.speed * elapsedTime
             self.y += directionY * self.speed * elapsedTime
 
-            self.distanceTravelled += getDistanceBetweenTwoPoints((self.x, self.y), (oldX, oldY))
+            self.distanceTravelled += myMath.getDistanceBetweenTwoPoints((self.x, self.y), (oldX, oldY))
 
         return False
 
@@ -144,6 +143,6 @@ class Robot:
         self.x = math.cos(self.angle) * self.radius + self.origin[0]
         self.y = -1 * math.sin(self.angle) * self.radius + self.origin[1] #negate because y goes down
 
-        self.distanceTravelled += getArcLength(angleThatWillBeMoved, self.radius)
+        self.distanceTravelled += myMath.getArcLength(angleThatWillBeMoved, self.radius)
 
         return (self.angle == self.angleOnCircleEdge)
