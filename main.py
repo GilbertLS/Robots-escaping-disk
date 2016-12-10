@@ -1,5 +1,6 @@
 import os, sys
 import math
+import random
 import pygame
 from pygame.locals import *
 
@@ -76,13 +77,21 @@ def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, verbose=False):
     print('------------------------------')
     print('whichRobotDidntFindExit:', whichRobotDidntFindExit)
 
+    if(whichRobotDidntFindExit == 1 and r2TravelToEdge + r2TravelOnCircleEdge < r1TravelToEdge):
+        r1TravelToEdge = r2TravelToEdge + r2TravelOnCircleEdge
+        r1TravelOnCircleEdge = 0
+    elif(whichRobotDidntFindExit == 2 and r1TravelToEdge + r1TravelOnCircleEdge < r2TravelToEdge):
+        r2TravelToEdge = r1TravelToEdge + r1TravelOnCircleEdge
+        r2TravelOnCircleEdge = 0
+
     """Find position of robot when exit is found by the other robot"""
+    """THIS IS WRONG!!!!!"""
     if(whichRobotDidntFindExit == 1):
         tempAngle = -1 * getAngleFromArcLength(r1TravelOnCircleEdge, radius)
-        posOfRobotWhoDidntFindExit = getPointOnCircleEdgeFromAngle(diskPos, radius, tempAngle + getAngleBetweenPointsOnCircle(diskPos, pointOnCircleAtAngleZero, startPointOnEdge))
+        posOfRobotWhoDidntFindExit = getPointOnCircleEdgeFromAngle(diskPos, radius, tempAngle - getAngleBetweenPointsOnCircle(diskPos, pointOnCircleAtAngleZero, startPointOnEdge))
     else:
         tempAngle = getAngleFromArcLength(r2TravelOnCircleEdge, radius)
-        posOfRobotWhoDidntFindExit = getPointOnCircleEdgeFromAngle(diskPos, radius, tempAngle + getAngleBetweenPointsOnCircle(diskPos, pointOnCircleAtAngleZero, startPointOnEdge))
+        posOfRobotWhoDidntFindExit = getPointOnCircleEdgeFromAngle(diskPos, radius, tempAngle - getAngleBetweenPointsOnCircle(diskPos, pointOnCircleAtAngleZero, startPointOnEdge))
     print('posOfRobotWhoDidntFindExit:', posOfRobotWhoDidntFindExit)
 
     """Distance traveled for second robot to exit"""
@@ -94,8 +103,18 @@ def calcData(diskPos, radius, r1StartPos, r2StartPos, exitPos, verbose=False):
     else:
         totalTravel = r2TravelToEdge + r2TravelOnCircleEdge + travelToEnd
 
+    print('r1Travel:', r1TravelToEdge + r1TravelOnCircleEdge)
+    print('r2Travel:', r2TravelToEdge + r2TravelOnCircleEdge)
+
     if(verbose):
-        return(startPointOnEdge, r1TravelOnCircleEdge, r2TravelOnCircleEdge, totalTravel)
+        return(
+            startPointOnEdge,
+            r1TravelToEdge,
+            r2TravelToEdge,
+            r1TravelOnCircleEdge,
+            r2TravelOnCircleEdge,
+            totalTravel
+        )
     else:
         return totalTravel
 
@@ -126,14 +145,16 @@ class Main:
         self.width = 600
         self.height = 600
         """Create the Screen"""
-        self.font = pygame.font.SysFont("monospace", 15)
+        self.font = pygame.font.SysFont("monospace", 20)
         self.screen = pygame.display.set_mode((self.width, self.height))
 
-    def new(self, radius, r1StartPos, r2StartPos, exitPos, startPointOnEdge, r1TravelOnCircleEdge, r2TravelOnCircleEdge):
+    def new(self, radius, r1StartPos, r2StartPos,
+            exitPos, startPointOnEdge, r1TravelToEdge, r2TravelToEdge,
+            r1TravelOnCircleEdge, r2TravelOnCircleEdge):
         """Create our classes"""
         self.disk  = Disk(radius, (300,300))
-        self.r1    = Robot(r1StartPos, exitPos, startPointOnEdge, r1TravelOnCircleEdge, False)
-        self.r2    = Robot(r2StartPos, exitPos, startPointOnEdge, r2TravelOnCircleEdge, True)
+        self.r1    = Robot(self.disk, r1StartPos, exitPos, startPointOnEdge, r1TravelToEdge, r1TravelOnCircleEdge, False)
+        self.r2    = Robot(self.disk, r2StartPos, exitPos, startPointOnEdge, r2TravelToEdge, r2TravelOnCircleEdge, True)
         self.exit  = Exit(exitPos)
         self.clock = pygame.time.Clock()
 
@@ -162,16 +183,33 @@ class Main:
             self._update()
             self._draw()
 
+def randomExit(origin, radius):
+    angle = random.random() * math.pi * 2;
+    x = math.cos(angle) * radius + origin[0]
+    y = math.sin(angle) * radius + origin[1]
+    return (x,y)
+
+def randomRPos(origin, radius):
+    angle = random.random() * math.pi * 2;
+    randomRadius = random.random() * radius;
+    x = math.cos(angle) * randomRadius + origin[0]
+    y = math.sin(angle) * randomRadius + origin[1]
+    return (x,y)
 
 if __name__ == "__main__":
     diskPos = (300,300)
     radius = 250
+
     r1Pos = (300, 300)
-    r2Pos = (300, 400)
-    exitPos = (550, 300)
+    r2Pos = (300, 300)
+    exitPos = randomExit(diskPos, 250)
+
+    #r1Pos = randomRPos(diskPos, radius)
+    #r2Pos = randomRPos(diskPos, radius)
+    exitPos = randomExit(diskPos, radius)
 
     data = calcData(diskPos, radius, r1Pos, r2Pos, exitPos, True)
     print(data)
     MainWindow = Main()
-    MainWindow.new(radius, r1Pos, r2Pos, exitPos, data[0], data[1], data[2])
+    MainWindow.new(radius, r1Pos, r2Pos, exitPos, data[0], data[1], data[2], data[3], data[4])
     MainWindow.MainLoop()

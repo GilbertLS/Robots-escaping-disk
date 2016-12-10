@@ -3,24 +3,25 @@ import math
 from myMath import *
 
 class Robot:
-    def __init__(self, position, exitPos, startPointOnEdge, travelOnCircleEdge, movesClockWise):
-        self.x = position[0]
-        self.y = position[1]
-        self.exitPos = exitPos
-        self.movesClockWise = movesClockWise
-        self.startPointOnEdge = startPointOnEdge
+    def __init__(self, disk, position, exitPos, startPointOnEdge, travelToEdge, travelOnCircleEdge, movesClockWise):
         self.speed = 125 #Amount of pixels moved per second
-
-        """Fix this"""
-        self.radius = 250
-        self.origin = (300,300)
-
         self.reachedEdge  = False
         self.reachedAngle = False
         self.reachedExit  = False
         self.distanceTravelled = 0
 
-        self.angleOnCircleEdge = getAngleFromArcLength(travelOnCircleEdge, self.radius)
+        self.origin = disk.getOrigin()
+        self.radius = disk.getRadius()
+        self.x = position[0]
+        self.y = position[1]
+        self.exitPos = exitPos
+        self.movesClockWise = movesClockWise
+        self.travelOnCircleEdge = travelOnCircleEdge
+
+        """Need to recalculate this in case exit is found before robot reaches circle edge"""
+        self.startPointOnEdge = getPointBetweenTwoPoints((self.x, self.y), startPointOnEdge, travelToEdge)
+
+        self.angleOnCircleEdge = getAngleFromArcLength(self.travelOnCircleEdge, self.radius)
         self.angle = getAngleBetweenPointsOnCircle(self.origin, (self.origin[0] + self.radius, self.origin[1]), self.startPointOnEdge)
 
         if(self.movesClockWise):
@@ -30,10 +31,11 @@ class Robot:
             self.angleOnCircleEdge = self.angle + self.angleOnCircleEdge
             self.color = (255,0,0)
 
-        print(self.movesClockWise, math.degrees(self.angle), math.degrees(self.angleOnCircleEdge))
-
     def draw(self, screen, font):
-        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), 10, 1)
+        if(self.reachedExit):
+            pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), 10, 0)
+        else:
+            pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), 10, 1)
         screen.set_at((int(self.x), int(self.y)), self.color)
         text = font.render(str(self.distanceTravelled), 1, self.color)
 
@@ -43,39 +45,55 @@ class Robot:
             screen.blit(text, (400, 40))
 
     def update(self, elapsedTime):
+        """Move robot towards point on edge"""
         if(not self.reachedEdge):
-            """Move robot towards point on edge"""
-            self.reachedEdge = self._moveRobotToPoint(self.startPointOnEdge, elapsedTime)
+            self.reachedEdge = self._moveRobotToStartPointOnEdge(elapsedTime)
 
+        """If other robot finds exit first, skip circle edge movement"""
+        if(self.reachedEdge and self.travelOnCircleEdge == 0):
+            self.reachedAngle = True
+
+        """Move robot on circle edge"""
         if(self.reachedEdge and not self.reachedAngle):
-            """Move robot on circle edge"""
             self.reachedAngle = self._moveRobotOnCircleEdge(elapsedTime);
 
+        """Move robot to exit"""
         if(self.reachedAngle and not self.reachedExit):
-            self.reachedExit = self._moveRobotToPoint(self.exitPos, elapsedTime)
+            self.reachedExit = self._moveRobotToExitPoint(elapsedTime)
 
+    def _moveRobotToStartPointOnEdge(self, elapsedTime):
+        point    = self.startPointOnEdge
+        distance = getDistanceBetweenTwoPoints(point, (self.x, self.y))
 
-    def _moveRobotToPoint(self, point, elapsedTime):
-        distance = math.sqrt(math.pow(point[0] - self.x, 2) + math.pow(point[1] - self.y, 2));
+        return self._moveRobotToPoint(point, distance, elapsedTime)
 
-        if(abs(distance) == 0):
-            return True;
+    def _moveRobotToExitPoint(self, elapsedTime):
+        point    = self.exitPos
+        distance = getDistanceBetweenTwoPoints(point, (self.x, self.y))
 
-        directionX = (point[0] - self.x) / distance
-        directionY = (point[1] - self.y) / distance
+        return self._moveRobotToPoint(point, distance, elapsedTime)
 
-        if(abs(distance) <= self.speed * elapsedTime):
-            self.x = point[0];
-            self.y = point[1];
-            return True
-
+    def _moveRobotToPoint(self, point, distance, elapsedTime):
         oldX = self.x
         oldY = self.y
 
-        self.x += directionX * self.speed * elapsedTime
-        self.y += directionY * self.speed * elapsedTime
+        if(distance == 0):
+            return True
+        elif(abs(distance) <= self.speed * elapsedTime):
+            self.x = point[0];
+            self.y = point[1];
 
-        self.distanceTravelled += getDistanceBetweenTwoPoints((self.x, self.y), (oldX, oldY))
+            self.distanceTravelled += getDistanceBetweenTwoPoints((self.x, self.y), (oldX, oldY))
+
+            return True
+        else:
+            directionX = (point[0] - self.x) / distance
+            directionY = (point[1] - self.y) / distance
+
+            self.x += directionX * self.speed * elapsedTime
+            self.y += directionY * self.speed * elapsedTime
+
+            self.distanceTravelled += getDistanceBetweenTwoPoints((self.x, self.y), (oldX, oldY))
 
         return False
 

@@ -6,5 +6,5 @@ class Exit:
         self.y = position[1]
 
     def draw(self, screen):
-        pygame.draw.rect(screen, (128,0,128), (self.x-10, self.y-10, 20, 20), 0)
-        screen.set_at((self.x, self.y), (255,255,255))
+        pygame.draw.rect(screen, (128,0,128), (int(self.x)-10, int(self.y)-10, 20, 20), 0)
+        screen.set_at((int(self.x), int(self.y)), (255,255,255))
