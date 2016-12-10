@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+import sys, os
 import math
 
 """ -----Notes-----
@@ -33,10 +35,19 @@ def getPointBetweenTwoPoints(point1Pos, point2Pos, distance):
 
     return (x, y)
 
-"""
-Returns angles between two points on circle's edge in radians
-"""
+"""Returns angles between two points on circle's edge in radians"""
 def getAngleBetweenPointsOnCircle(originPos, point1Pos, point2Pos):
     first  = math.atan2(point1Pos[1] - originPos[1], point1Pos[0] - originPos[0])
     second = math.atan2(point2Pos[1] - originPos[1], point2Pos[0] - originPos[0])
     return first - second
+
+"""Used to supress debug print statements"""
+@contextmanager
+def suppress_stdout():
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
