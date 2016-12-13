@@ -1,17 +1,20 @@
 import os, sys, getopt
 import math
 import random
+import bisect
 
 import utilities
 from classes.window import Window
 from calculateTravel import calculateTravel
 
+"""Get a random exit position on circle edge"""
 def randomExit(origin, radius):
     angle = random.random() * math.pi * 2;
     x = math.cos(angle) * radius + origin[0]
     y = math.sin(angle) * radius + origin[1]
     return (x,y)
 
+"""Get a random robot position inside circle"""
 def randomRPos(origin, radius):
     angle = random.random() * math.pi * 2;
     randomRadius = random.random() * radius;
@@ -19,6 +22,7 @@ def randomRPos(origin, radius):
     y = math.sin(angle) * randomRadius + origin[1]
     return (x,y)
 
+"""Create data needed to calculate execution time and run simulation"""
 def setupNew(scenario=1, window=None, debug=False):
     diskPos = (300,300)
     radius  = 250
@@ -46,6 +50,7 @@ def setupNew(scenario=1, window=None, debug=False):
 
     return data[5] / radius
 
+"""Prints how to use the program"""
 def printUsage():
     print('Usage: main.py [ options ... ]')
     print('')
@@ -55,6 +60,7 @@ def printUsage():
     print(' --scenario:     Which escape scenario to run (default:1) [1,2,3]')
     print(' --iterations:   Number of iterations of the algorithm (default: 1, max: 1000)')
 
+"""Loops through every iteration, running simulation if needed"""
 def loop(scenario, iterations, debug, simulate):
     MainWindow = None
     results = []
@@ -64,15 +70,19 @@ def loop(scenario, iterations, debug, simulate):
 
     for i in range(1, iterations + 1):
         result = setupNew(scenario, MainWindow, debug)
-        results.insert(i-1, result)
+        bisect.insort_left(results, result)
         print('Iteration ', i, ' Time:\t', result)
 
         if(simulate is True):
             MainWindow.MainLoop()
 
     print('-------------------')
-    print('Average time over', iterations, 'iterations:', sum(results)/iterations)
+    print('Performed', iterations, 'iterations of scenario', scenario)
+    print('Average time:\t', sum(results)/iterations)
+    print('Worst time:\t', results[-1])
+    print('-------------------')
 
+"""Gets the arguments from the input and starts the program"""
 def main(argv):
     scenario   = 1
     iterations = 1

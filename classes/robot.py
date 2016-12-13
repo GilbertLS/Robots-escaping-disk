@@ -68,7 +68,7 @@ class Robot:
     def update(self, elapsedTime):
         """Move robot towards point on edge"""
         if(not self.reachedEdge):
-            self.reachedEdge = self._moveRobotToStartPointOnEdge(elapsedTime)
+            self.reachedEdge = self._moveRobotToStartPoint(elapsedTime)
 
         """If other robot finds exit first, skip circle edge movement"""
         if(self.reachedEdge and self.travelOnCircleEdge == 0):
@@ -87,7 +87,7 @@ class Robot:
         return self.reachedExit
 
     """Calls _moveRobotToPoint, to move robot to startPointOnEdge"""
-    def _moveRobotToStartPointOnEdge(self, elapsedTime):
+    def _moveRobotToStartPoint(self, elapsedTime):
         point    = self.startPointOnEdge
         distance = utilities.getDistanceBetweenTwoPoints(point, (self.x, self.y))
 
